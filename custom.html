@@ -1,0 +1,100 @@
+<html>
+<head lang="zh-cn">
+    <meta charset="utf-8">
+    <title></title>
+</head>
+<body>
+<script type="text/javascript">
+    var socket;
+    var cId;
+    if (!window.WebSocket) {
+        window.WebSocket = window.MozWebSocket;
+    }
+    if (window.WebSocket) {
+        //创建连接实例
+        socket = new WebSocket("ws://localhost:5544/ws");
+        socket.onmessage = function (event) {
+            console.log(event.data);
+            var jsonobj = eval("(" + event.data + ")")
+            var user = jsonobj.user
+            cId = user.cId;
+            console.log(cId);
+            //得到消息
+        };
+        socket.onopen = function (event) {
+            console.log("websocket 打开了");
+
+            // 连接开启
+        };
+        socket.onclose = function (event) {
+            console.log("websocket 关闭了");
+            //服务器关闭
+        };
+    } else {
+        //ie8不兼容使用 flash进行通讯
+        //....
+    }
+
+    function login(message) {
+        if (!window.WebSocket) {
+            return;
+        }
+        if (socket.readyState == WebSocket.OPEN) {
+//            socket.send("我要发个json，因为我服务器是json来接收");
+            var data = {
+                "type": "join",
+                "info": message,
+                "userName": "3",
+                "userId": "0001",
+                "userRole": 1,
+                "userHead": "i am head",
+                "account":"admin",
+                "password":"md5",
+                "to":"i"
+            };
+            var stringData = JSON.stringify(data)
+            socket.send(stringData);
+        } else {
+            //服务器关闭
+            alert("The socket is not open.");
+        }
+    }
+
+
+    function send(message) {
+        if (!window.WebSocket) {
+            return;
+        }
+        if (socket.readyState == WebSocket.OPEN) {
+//            socket.send("我要发个json，因为我服务器是json来接收");
+            console.log(cId)
+            var data = {
+                "type": "msgTo",
+                "info": message,
+                "userName": "3",
+                "userId": "0001",
+                "userRole": 1,
+                "userHead": "i am head",
+                "account":"admin",
+                "password":"md5",
+                "to":cId
+            };
+            var stringData = JSON.stringify(data)
+            socket.send(stringData);
+        } else {
+            //服务器关闭
+            alert("The socket is not open.");
+        }
+    }
+
+</script>
+<form onsubmit="return false;">
+    <input type="text" name="message" value="Hello, World!"/>
+
+    <input type="button" value="login" onclick="login(this.form.message.value)"/>
+
+
+    <input type="button" value="Send Web Socket Data" onclick="send(this.form.message.value)"/>
+</form>
+</body>
+</html>
